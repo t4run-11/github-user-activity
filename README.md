@@ -1,85 +1,125 @@
-# GitHub User Activity CLI
+# GitHub User Activity
 
-A small command-line program that fetches a GitHub user's recent public events and prints readable activity summaries. It uses Node.js's built-in `fetch()` and file-system modules, so there are no external dependencies.
+A responsive web app for exploring a GitHub user's recent public activity, backed by the GitHub REST API. The project also retains its original command-line interface (CLI).
 
 ## Requirements
 
 - Node.js 18 or newer
+- npm
+
+## Run locally
+
+Install dependencies and start the web server:
+
+```sh
+npm ci
+npm start
+```
+
+Open <http://localhost:3000>. The server binds to `0.0.0.0` and uses `PORT` when it is set.
+
+The browser sends same-origin requests to the Express API. The server validates the username, calls GitHub using the existing API integration, processes and formats the event data, and returns it to the frontend. No private GitHub credentials are required or sent to the browser; the app only reads public events.
+
+### API endpoints
+
+- `GET /` serves the web application.
+- `GET /api/users/:username/events` returns processed activity as JSON.
+- `GET /health` returns `{ "status": "ok" }`.
+
+Example:
+
+```sh
+curl http://localhost:3000/api/users/torvalds/events
+```
+
+Each event includes its GitHub event type, repository name, timestamp, event details, and a readable description. An empty `events` array means the user has no recent public activity.
+
+The API responds with:
+
+- `400` for an invalid username.
+- `404` when GitHub cannot find the user.
+- `429` when GitHub's API rate limit is reached.
+- `502` for network errors or other GitHub API failures.
 
 ## Run the CLI
 
-From the project directory, provide a GitHub username:
+The original CLI remains available:
+
+```sh
+npm run cli -- torvalds
+```
+
+To also save the raw response to `src/data/activity.json`:
+
+```sh
+npm run cli -- torvalds --save
+```
+
+Direct invocation continues to work as well:
 
 ```sh
 node index.js torvalds
 ```
 
-Or use the npm script:
+## Project structure
 
-```sh
-npm start -- torvalds
-```
+- `server.js` - Express server, static frontend serving, and API routes.
+- `public/index.html` - Page structure and accessible search form.
+- `public/style.css` - Responsive visual design.
+- `public/app.js` - Search requests, activity cards, and loading/error/empty states.
+- `index.js` - Existing CLI entry point.
+- `src/github.js` - GitHub API request and upstream error handling.
+- `src/activity.js` - Event validation and normalization.
+- `src/formatter.js` - Readable event descriptions shared by the CLI and web API.
+- `src/validator.js` - GitHub username validation.
+- `src/storage.js` - Optional CLI activity file saving.
+- `test/` - CLI and Express API tests.
 
-To also save the raw API response:
+## Tests
 
-```sh
-node index.js torvalds --save
-```
-
-The `--save` option writes `src/data/activity.json`. The file includes the username, the time the data was fetched, and the raw event array. A later `--save` run replaces the previous file.
-
-Example output:
-
-```text
-Pushed 2 commits to master in torvalds/linux.
-Opened issue #123 "Example issue" in owner/project.
-Starred owner/project.
-```
-
-The exact output depends on the user's public activity. If GitHub returns no events, the CLI prints:
-
-```text
-No recent public activity found.
-```
-
-## What the files do
-
-- `index.js` reads and validates command-line arguments, runs the request and processing steps, and prints the output.
-- `src/validator.js` checks that the username follows GitHub's 1–39 character username format.
-- `src/github.js` sends the HTTP request and reports HTTP and network errors.
-- `src/activity.js` extracts the repository, event type, timestamp, and event-specific details from GitHub's JSON.
-- `src/formatter.js` turns processed events into terminal-friendly sentences.
-- `src/storage.js` writes the raw response to JSON when `--save` is supplied.
-- `src/data/activity.json` is created when the save option is used.
-- `test/app.test.js` contains automated tests using Node's built-in test runner.
-
-## Events summarized
-
-The CLI has specific summaries for `PushEvent`, `IssuesEvent`, `WatchEvent`, `CreateEvent`, `PullRequestEvent`, `DeleteEvent`, `ForkEvent`, and `ReleaseEvent`. Other event types receive a generic summary.
-
-## Errors
-
-- Missing or malformed usernames show a usage or validation message.
-- A 404 response reports that the user was not found.
-- A 403 response identifies a rate limit when GitHub's response header indicates one; other 403 responses report an access restriction.
-- 5xx responses report a GitHub server error.
-- Network and file-saving failures are reported separately.
-
-## Run tests
-
-No dependency installation is needed. Run:
+Run the existing CLI and web API test suites:
 
 ```sh
 npm test
 ```
 
-The tests cover username validation, event processing and formatting, empty and malformed activity, HTTP/network error handling, and CLI input validation.
+Tests cover username validation, event processing and formatting, GitHub/network failures, empty activity, the health and API endpoints, and frontend static-file serving.
 
-## How the application works
+## Deploy to GitHub and Render
 
-1. `index.js` reads the username from `process.argv`.
-2. `validator.js` checks the username before any request is made.
-3. `github.js` requests `https://api.github.com/users/{username}/events` and parses the JSON response.
-4. `activity.js` extracts a consistent set of fields from each event.
-5. `formatter.js` creates readable descriptions for the terminal.
-6. If `--save` was supplied, `storage.js` also saves the raw response as JSON.
+### 1. Push the project to GitHub
+
+Create an empty repository on GitHub (without generating a second README), then from the project directory review the files and push the project to your chosen branch:
+
+```sh
+git status
+git add .
+git commit -m "Prepare GitHub activity web app"
+git remote add origin https://github.com/<your-account>/<repository>.git
+git push -u origin main
+```
+
+Replace the repository URL with your own. If an `origin` remote already exists, keep it and push to your intended branch instead of adding it again. Include `package-lock.json`; do not commit `node_modules/` or private credentials.
+
+### 2. Create a Render Web Service
+
+1. Sign in to [Render](https://render.com/) and choose **New → Web Service**.
+2. Connect the GitHub repository and select the deployment branch.
+3. Choose the Node runtime.
+4. Set the build command to `npm ci`.
+5. Set the start command to `npm start`.
+6. Create the service and wait for the deployment to finish.
+
+Render supplies `PORT` at runtime. The app reads that value and listens on `0.0.0.0`, so no port or host setting is needed in Render. No GitHub token or other secret environment variable is required for public activity.
+
+### 3. Verify the deployment
+
+Open the Render service URL to use the app. Check the service's health endpoint at `/health`; it should return:
+
+```json
+{"status":"ok"}
+```
+
+You can also verify the API at `/api/users/torvalds/events`. Review Render's deployment logs if the service does not start. Render can be configured to redeploy automatically when new commits are pushed to the connected branch.
+
+GitHub API unauthenticated rate limits apply. If the limit is reached, the app reports that the user should try again later.

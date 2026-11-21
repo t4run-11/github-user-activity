@@ -6,6 +6,7 @@ import { processActivity } from "../src/activity.js";
 import { formatActivity } from "../src/formatter.js";
 import { fetchUserEvents } from "../src/github.js";
 import { isValidUsername } from "../src/validator.js";
+import { processCommits, sortTimeline } from "../src/activity.js";
 
 const indexPath = fileURLToPath(new URL("../index.js", import.meta.url));
 
@@ -155,4 +156,52 @@ test("shows usage and validation errors without making a network request", () =>
   const invalid = spawnSync(process.execPath, [indexPath, "-bad"], { encoding: "utf8" });
   assert.equal(invalid.status, 1);
   assert.match(invalid.stderr, /Invalid GitHub username/);
+});
+
+test("processes GitHub commits into the common activity structure", () => {
+  const commits = [
+    {
+      commit: {
+        message: "Add profile README\n\nUpdate documentation",
+        author: {
+          date: "2026-11-21T08:00:00Z",
+        },
+      },
+      html_url: "https://github.com/t4run-11/github-user-activity/commit/abc123",
+    },
+  ];
+
+  const result = processCommits(
+    commits,
+    "t4run-11/github-user-activity"
+  );
+
+  assert.deepEqual(result, [
+    {
+      type: "Commit",
+      repository: "t4run-11/github-user-activity",
+      createdAt: "2026-11-21T08:00:00Z",
+      description: "Add profile README",
+      url: "https://github.com/t4run-11/github-user-activity/commit/abc123",
+    },
+  ]);
+});
+
+test("sorts combined activities by newest date first", () => {
+  const activities = [
+    { type: "Commit", createdAt: "2026-11-19T10:00:00Z" },
+    { type: "PushEvent", createdAt: "2026-11-21T08:00:00Z" },
+    { type: "Commit", createdAt: "2026-11-20T12:00:00Z" },
+  ];
+
+  const result = sortTimeline(activities);
+
+  assert.deepEqual(
+    result.map((activity) => activity.createdAt),
+    [
+      "2026-11-21T08:00:00Z",
+      "2026-11-20T12:00:00Z",
+      "2026-11-19T10:00:00Z",
+    ]
+  );
 });

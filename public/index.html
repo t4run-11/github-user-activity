@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Explore recent public GitHub activity by username."
+    >
+    <meta name="theme-color" content="#10131b">
+    <title>GitHub Activity — Dev Pulse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="/style.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-glow page-glow-top" aria-hidden="true"></div>
+    <div class="page-glow page-glow-bottom" aria-hidden="true"></div>
+
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Dev Pulse home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M8 5 3 12l5 7M16 5l5 7-5 7M14 3l-4 18" />
+            </svg>
+          </span>
+          <span>dev<span class="brand-accent">pulse</span></span>
+        </a>
+        <span class="topbar-note"><span class="live-dot"></span> Public activity explorer</span>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="page-title">
+          <p class="eyebrow"><span class="eyebrow-line"></span> GitHub activity, at a glance</p>
+          <h1 id="page-title">Follow the work<br>behind the <span>code.</span></h1>
+          <p class="hero-copy">
+            See the latest public commits, issues, releases, and more from any GitHub user.
+          </p>
+
+          <form id="search-form" class="search-panel">
+            <label for="username">GitHub username</label>
+            <div class="search-row">
+              <div class="input-wrap">
+                <span class="input-prefix" aria-hidden="true">@</span>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  placeholder="try octocat"
+                  autocomplete="off"
+                  autocapitalize="none"
+                  spellcheck="false"
+                  minlength="1"
+                  maxlength="39"
+                  pattern="[A-Za-z0-9]+(-[A-Za-z0-9]+)*"
+                  aria-describedby="search-hint"
+                  required
+                >
+              </div>
+              <button class="search-button" type="submit">
+                <span>Search activity</span>
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M4 10h12m-5-5 5 5-5 5" />
+                </svg>
+              </button>
+              <button class="clear-button" id="clear-button" type="button" disabled>
+                Clear
+              </button>
+            </div>
+            <p id="search-hint" class="search-hint">
+              Enter a username to explore their recent public activity.
+            </p>
+          </form>
+        </section>
+
+        <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+
+        <section id="welcome-state" class="welcome-state" aria-label="Welcome">
+          <div class="welcome-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M12 12h24v24H12zM18 20h12M18 25h8M18 30h10" />
+              <path d="M8 18V8h10M40 30v10H30" />
+            </svg>
+          </div>
+          <div>
+            <p class="welcome-title">Your next rabbit hole starts here.</p>
+            <p class="welcome-copy">Search a username to see what they’ve been building lately.</p>
+          </div>
+          <span class="welcome-arrow" aria-hidden="true">↗</span>
+        </section>
+
+        <section id="results" class="results" aria-labelledby="results-title" hidden>
+          <div class="results-heading">
+            <div>
+              <p class="eyebrow results-eyebrow"><span class="eyebrow-line"></span> The latest</p>
+              <h2 id="results-title">Recent activity</h2>
+            </div>
+            <p id="result-count" class="result-count"></p>
+          </div>
+          <div id="activity-list" class="activity-list"></div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>Made for curious developers.</span>
+        <span>Activity is public · Data from GitHub</span>
+      </footer>
+    </div>
+  </body>
+</html>

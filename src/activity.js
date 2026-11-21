@@ -58,3 +58,43 @@ export function processActivity(events) {
     };
   });
 }
+
+export function processCommits(commits, repository) {
+  if (!Array.isArray(commits)) {
+    throw new TypeError("Expected GitHub commits to be an array.");
+  }
+
+  return commits.map((item) => {
+    const commit = item?.commit;
+    const message = commit?.message;
+    const createdAt = commit?.author?.date;
+
+    if (
+      typeof message !== "string" ||
+      typeof createdAt !== "string" ||
+      typeof item.html_url !== "string"
+    ) {
+      throw new TypeError(
+        "GitHub commit contains an unexpected structure."
+      );
+    }
+
+    return {
+      type: "Commit",
+      repository,
+      createdAt,
+      description: message.split("\n")[0],
+      url: item.html_url,
+    };
+  });
+}
+
+export function sortTimeline(activities) {
+  if (!Array.isArray(activities)) {
+    throw new TypeError("Expected activities to be an array.");
+  }
+
+  return [...activities].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+}
