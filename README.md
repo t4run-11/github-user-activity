@@ -16,7 +16,7 @@ npm ci
 npm start
 ```
 
-Open <http://localhost:3000>. The server binds to `0.0.0.0` and uses `PORT` when it is set.
+Open <https://github-user-activity-0rn0.onrender.com>. The server binds to `0.0.0.0` and uses `PORT` when it is set.
 
 The browser sends same-origin requests to the Express API. The server validates the username, calls GitHub using the existing API integration, processes and formats the event data, and returns it to the frontend. No private GitHub credentials are required or sent to the browser; the app only reads public events.
 
