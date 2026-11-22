@@ -1,125 +1,252 @@
 # GitHub User Activity
 
-A responsive web app for exploring a GitHub user's recent public activity, backed by the GitHub REST API. The project also retains its original command-line interface (CLI).
+A responsive web application built with **Node.js and Express** that allows users to explore a GitHub profile's recent public activity, including commits, pushes, and other GitHub events. It uses the GitHub REST API to fetch, process, and display activity in a chronological timeline.
 
-## Requirements
+The project also retains its original command-line interface (CLI).
+
+## 🚀 Live Demo
+
+**[Visit GitHub User Activity](https://github-user-activity-0rn0.onrender.com)**
+
+## ✨ Features
+
+- Search GitHub users by username.
+- Fetch recent public GitHub events.
+- Retrieve recent commits from public repositories owned by the user.
+- Display commits and events in a chronological timeline.
+- Open individual commits directly on GitHub.
+- Show repository names, activity descriptions, and timestamps.
+- Responsive and user-friendly interface.
+- Input validation and error handling.
+- Loading, empty, and error states.
+- Original CLI functionality preserved.
+- Automated tests using Node.js built-in test runner.
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| Node.js | JavaScript runtime |
+| Express.js | Backend server and REST API |
+| JavaScript | Application logic and frontend functionality |
+| HTML5 | Web page structure |
+| CSS3 | Responsive styling |
+| GitHub REST API | Fetch GitHub activity and commits |
+| Node.js Test Runner | Automated testing |
+| Render | Web application hosting |
+
+## 📸 Application Preview
+
+Visit the [Live Application](https://github-user-activity-0rn0.onrender.com) to explore the interface.
+
+## 📋 Requirements
 
 - Node.js 18 or newer
 - npm
+- Git
 
-## Run locally
+## 💻 Run Locally
 
-Install dependencies and start the web server:
+**1. Clone the repository**
 
-```sh
+```bash
+git clone https://github.com/t4run-11/github-user-activity.git
+```
+
+**2. Navigate to the project directory**
+
+```bash
+cd github-user-activity
+```
+
+**3. Install dependencies**
+
+```bash
 npm ci
+```
+
+**4. Start the web server**
+
+```bash
 npm start
 ```
 
-Open <https://github-user-activity-0rn0.onrender.com>. The server binds to `0.0.0.0` and uses `PORT` when it is set.
+**5. Open the application**
 
-The browser sends same-origin requests to the Express API. The server validates the username, calls GitHub using the existing API integration, processes and formats the event data, and returns it to the frontend. No private GitHub credentials are required or sent to the browser; the app only reads public events.
+Visit:
 
-### API endpoints
+```text
+http://localhost:3000
+```
 
-- `GET /` serves the web application.
-- `GET /api/users/:username/events` returns processed activity as JSON.
-- `GET /health` returns `{ "status": "ok" }`.
+The server uses the `PORT` environment variable when available and listens on `0.0.0.0`.
 
-Example:
+## 🔌 API Endpoints
 
-```sh
+The Express server provides the following endpoints:
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Serves the web application |
+| GET | `/api/users/:username/events` | Returns processed GitHub activity as JSON |
+| GET | `/health` | Checks server health |
+
+**Example API request:**
+
+```bash
 curl http://localhost:3000/api/users/torvalds/events
 ```
 
-Each event includes its GitHub event type, repository name, timestamp, event details, and a readable description. An empty `events` array means the user has no recent public activity.
+**Example response:**
 
-The API responds with:
+```json
+{
+  "username": "octocat",
+  "events": [
+    {
+      "type": "Commit",
+      "repository": "octocat/hello-world",
+      "createdAt": "2026-01-02T00:00:00Z",
+      "description": "Add README",
+      "url": "https://github.com/octocat/hello-world/commit/abc123"
+    }
+  ]
+}
+```
 
-- `400` for an invalid username.
-- `404` when GitHub cannot find the user.
-- `429` when GitHub's API rate limit is reached.
-- `502` for network errors or other GitHub API failures.
+Each activity contains its type, repository, timestamp, and a readable description. Commit activities also include a direct GitHub commit URL.
 
-## Run the CLI
+An empty `events` array means no activities were found in the data retrieved by the application.
 
-The original CLI remains available:
+### Error Handling
 
-```sh
+| HTTP Status | Description |
+|---|---|
+| 400 | Invalid GitHub username |
+| 404 | GitHub user not found |
+| 429 | GitHub API rate limit reached |
+| 502 | Network or GitHub API error |
+
+## ⌨️ Run the CLI
+
+The original command-line interface is still available.
+
+**Run the CLI:**
+
+```bash
 npm run cli -- torvalds
 ```
 
-To also save the raw response to `src/data/activity.json`:
+**Save the raw activity response:**
 
-```sh
+```bash
 npm run cli -- torvalds --save
 ```
 
-Direct invocation continues to work as well:
+You can also execute it directly:
 
-```sh
+```bash
 node index.js torvalds
 ```
 
-## Project structure
+## 📁 Project Structure
 
-- `server.js` - Express server, static frontend serving, and API routes.
-- `public/index.html` - Page structure and accessible search form.
-- `public/style.css` - Responsive visual design.
-- `public/app.js` - Search requests, activity cards, and loading/error/empty states.
-- `index.js` - Existing CLI entry point.
-- `src/github.js` - GitHub API request and upstream error handling.
-- `src/activity.js` - Event validation and normalization.
-- `src/formatter.js` - Readable event descriptions shared by the CLI and web API.
-- `src/validator.js` - GitHub username validation.
-- `src/storage.js` - Optional CLI activity file saving.
-- `test/` - CLI and Express API tests.
+```text
+github-user-activity/
+│
+├── public/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+│
+├── src/
+│   ├── github.js
+│   ├── activity.js
+│   ├── formatter.js
+│   ├── validator.js
+│   ├── storage.js
+│   └── data/
+│
+├── test/
+│   ├── app.test.js
+│   └── server.test.js
+│
+├── index.js
+├── server.js
+├── package.json
+├── package-lock.json
+├── .gitignore
+└── README.md
+```
 
-## Tests
+### Important Files
 
-Run the existing CLI and web API test suites:
+- `server.js` – Express server, API routes, and static frontend serving.
+- `public/index.html` – Web application structure.
+- `public/style.css` – Responsive styling.
+- `public/app.js` – Frontend logic, API requests, and activity cards.
+- `index.js` – CLI entry point.
+- `src/github.js` – GitHub API requests and error handling.
+- `src/activity.js` – Activity validation, processing, and sorting.
+- `src/formatter.js` – Human-readable activity descriptions.
+- `src/validator.js` – GitHub username validation.
+- `src/storage.js` – Optional CLI activity storage.
+- `test/` – Automated tests for CLI and web API functionality.
 
-```sh
+## 🧪 Run Tests
+
+Execute the test suite:
+
+```bash
 npm test
 ```
 
-Tests cover username validation, event processing and formatting, GitHub/network failures, empty activity, the health and API endpoints, and frontend static-file serving.
+The automated tests cover:
 
-## Deploy to GitHub and Render
+- GitHub username validation.
+- Event processing and formatting.
+- Commit processing and timeline sorting.
+- GitHub API error handling.
+- Network failures and rate limits.
+- Empty activity responses.
+- Express health and API endpoints.
+- Frontend static-file serving.
 
-### 1. Push the project to GitHub
+**Current test results: 13 passed, 0 failed.**
 
-Create an empty repository on GitHub (without generating a second README), then from the project directory review the files and push the project to your chosen branch:
+## ☁️ Deployment
 
-```sh
-git status
-git add .
-git commit -m "Prepare GitHub activity web app"
-git remote add origin https://github.com/<your-account>/<repository>.git
-git push -u origin main
-```
+The application is deployed using [Render](https://render.com/).
 
-Replace the repository URL with your own. If an `origin` remote already exists, keep it and push to your intended branch instead of adding it again. Include `package-lock.json`; do not commit `node_modules/` or private credentials.
+Deployment configuration:
 
-### 2. Create a Render Web Service
+| Setting | Value |
+|---|---|
+| Runtime | Node |
+| Build Command | `npm ci` |
+| Start Command | `npm start` |
+| Hosting | Render Web Service |
 
-1. Sign in to [Render](https://render.com/) and choose **New → Web Service**.
-2. Connect the GitHub repository and select the deployment branch.
-3. Choose the Node runtime.
-4. Set the build command to `npm ci`.
-5. Set the start command to `npm start`.
-6. Create the service and wait for the deployment to finish.
+The application uses Render's assigned `PORT` environment variable and does not require a GitHub access token for public activity.
 
-Render supplies `PORT` at runtime. The app reads that value and listens on `0.0.0.0`, so no port or host setting is needed in Render. No GitHub token or other secret environment variable is required for public activity.
+**Live URL:** https://github-user-activity-0rn0.onrender.com
 
-### 3. Verify the deployment
+## ⚠️ Notes
 
-Open the Render service URL to use the app. Check the service's health endpoint at `/health`; it should return:
+- The application retrieves public GitHub activity only.
+- GitHub's Events API provides a limited recent activity feed, not a complete history.
+- Commit retrieval is limited to recent commits from the public repositories owned by the user that the application checks.
+- GitHub's unauthenticated API rate limits apply.
+- Render's free service may sleep after inactivity, so the first request can take additional time.
 
-```json
-{"status":"ok"}
-```
+## 👨‍💻 Author
 
-You can also verify the API at `/api/users/torvalds/events`. Review Render's deployment logs if the service does not start. Render can be configured to redeploy automatically when new commits are pushed to the connected branch.
+**Tarun Chourasiya**
 
-GitHub API unauthenticated rate limits apply. If the limit is reached, the app reports that the user should try again later.
+- GitHub: [@t4run-11](https://github.com/t4run-11)
+- Project Repository: [github-user-activity](https://github.com/t4run-11/github-user-activity)
+- Live Demo: [GitHub User Activity](https://github-user-activity-0rn0.onrender.com)
+
+---
+
+If you find this project useful, consider giving the repository a ⭐ on GitHub!
